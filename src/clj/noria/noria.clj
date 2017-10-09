@@ -92,11 +92,11 @@
             key->component (into {}
                                  (map (fn [c] [(component-key c) c]))
                                  children)
-            
+
             new-keys-set (into #{} new-keys)
             ctx-with-removes (update ctx :updates
                                      (fn [updates]
-                                       (transduce (comp (remove #(contains? common component-key))
+                                       (transduce (comp (remove #(contains? common (component-key %)))
                                                         (mapcat
                                                          (fn [{node :noria/node :as child}]
                                                            (let [remove {:noria/update-type :remove
@@ -123,7 +123,7 @@
                                                  :noria/child-node child-node
                                                  :noria/parent-node parent-node})))
                               conj! updates children-reconciled)))])
-      
+
       (reduce-children (fn [[child-c child-e] ctx]
                          (reconcile child-c child-e r-f ctx))
                        ctx
@@ -146,7 +146,7 @@
                                :noria/new-props new-props
                                :noria/old-props old-props}))])))
 
-(defn reconcile-user [{:noria/keys [subst render state] :as component} {[_ & args] :elt key :key :as element} r-f ctx]  
+(defn reconcile-user [{:noria/keys [subst render state] :as component} {[_ & args] :elt key :key :as element} r-f ctx]
   (let [[state' subst-e] (binding [*sink* (atom ::nil)]
                          [(apply render state args)
                           @*sink*])]
@@ -165,4 +165,3 @@
   (if (user-component? element)
     (reconcile-user c element r-f ctx)
     (reconcile-primitive c element r-f ctx)))
-
